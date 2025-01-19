@@ -3,6 +3,7 @@ from fastapi.responses import JSONResponse
 import cv2
 import numpy as np
 from io import BytesIO
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
