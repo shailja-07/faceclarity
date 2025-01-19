@@ -46,7 +46,7 @@ def check_angle(image):
             return "Face angle is good."
 
 @app.post("/check-image/")
-async def check_image(file: UploadFile = File(...)):
+async def check_image(file:UploadFile = File(...)):
     try:
         # Read and decode the uploaded image
         contents = await file.read()
@@ -58,8 +58,8 @@ async def check_image(file: UploadFile = File(...)):
         angle_result = check_angle(image)
 
         return JSONResponse(content={
-            "lighting": lighting_result,
-            "angle": angle_result
+            "lighting":lighting_result,
+            "angle":angle_result
         }, status_code=200)
 
     except Exception as e:
