@@ -7,14 +7,20 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
-
-
+# Update CORS middleware configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[""],  
+    # For CORS, only the origin part (protocol + hostname + port) matters, not the path
+    allow_origins=[
+        "http://localhost:5173",  # This will cover all paths under localhost:5173
+        "http://127.0.0.1:5173"   # Alternative localhost notation
+    ],
     allow_credentials=True,
-    allow_methods=["*"], 
-    allow_headers=["*"],  
+    allow_methods=["*"],
+    allow_headers=["*"],
+    # Optional: if you need to allow cookies and authorization headers
+    expose_headers=["*"],
+    max_age=600,  # Cache preflight requests for 10 minutes
 )
 
 def check_lighting(image):
@@ -50,19 +56,27 @@ def check_angle(image):
 @app.post("/check-image/")
 async def check_image(file: UploadFile = File(...)):
     try:
-        
         contents = await file.read()
         nparr = np.frombuffer(contents, np.uint8)
         image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-
         
         lighting_result = check_lighting(image)
         angle_result = check_angle(image)
-
-        return JSONResponse(content={
-            "lighting": lighting_result,
-            "angle": angle_result
-        }, status_code=200)
-
+        
+        return JSONResponse(
+            content={
+                "lighting": lighting_result,
+                "angle": angle_result
+            },
+            status_code=200
+        )
     except Exception as e:
-        return JSONResponse(content={"error": str(e)}, status_code=500)
+        return JSONResponse(
+            content={"error": str(e)},
+            status_code=500
+        )
+
+# Optional: Add a test endpoint
+@app.get("/")
+async def root():
+    return {"message": "Server is running"}
