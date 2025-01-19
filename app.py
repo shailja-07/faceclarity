@@ -1,6 +1,5 @@
 from fastapi import FastAPI, File, UploadFile
 from fastapi.responses import JSONResponse
-from fastapi.middleware.cors import CORSMiddleware
 import cv2
 import numpy as np
 from io import BytesIO
@@ -8,12 +7,14 @@ from io import BytesIO
 app = FastAPI()
 
 
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[""], 
+    allow_origins=[""],  
     allow_credentials=True,
     allow_methods=["*"], 
     allow_headers=["*"],  
+)
 
 def check_lighting(image):
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -46,20 +47,20 @@ def check_angle(image):
             return "Face angle is good."
 
 @app.post("/check-image/")
-async def check_image(file:UploadFile = File(...)):
+async def check_image(file: UploadFile = File(...)):
     try:
-        # Read and decode the uploaded image
+        
         contents = await file.read()
         nparr = np.frombuffer(contents, np.uint8)
         image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
-        # Perform lighting and angle checks
+        
         lighting_result = check_lighting(image)
         angle_result = check_angle(image)
 
         return JSONResponse(content={
-            "lighting":lighting_result,
-            "angle":angle_result
+            "lighting": lighting_result,
+            "angle": angle_result
         }, status_code=200)
 
     except Exception as e:
